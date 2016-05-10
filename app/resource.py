@@ -27,3 +27,26 @@ class BucketLists(Resource):
         #args = parser.parse_args()
         #todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
         return {}, 201
+
+
+class BucketListItem(Resource):
+    def get(self, id, item_id):
+        return {'bucketlist_id':id, 'item_id':item_id}
+
+    def delete(self, id, item_id):
+        return '', 204
+
+    def put(self, id, item_id):
+        #args = parser.parse_args()
+        #task = {'task': args['task']}
+        return {}, 201
+
+
+class BucketListItems(Resource):
+    def get(self, id):
+        return []
+
+    def post(self, id):
+        #args = parser.parse_args()
+        #todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
+        return {}, 201

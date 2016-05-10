@@ -7,6 +7,8 @@ api = Api(app)
 
 api.add_resource(BucketLists, '/api/v1.0/bucketlists')
 api.add_resource(BucketList, '/api/v1.0/bucketlists/<id>')
+api.add_resource(BucketListItems, '/api/v1.0/bucketlists/<id>/items')
+api.add_resource(BucketListItem, '/api/v1.0/bucketlists/<id>/items/<item_id>')
 
 @app.route('/')
 @app.route('/index')
