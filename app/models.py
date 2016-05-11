@@ -4,10 +4,11 @@ from datetime import datetime
 class BucketListModel(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), unique=True)
-    items = db.relationship('BucketListItemModel', backref='bucketlist', lazy='dynamic')
+    #items = db.relationship('BucketListItemModel', backref='bucketlist')
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    user = db.relationship('User', backref=db.backref('bucketlists', lazy='dynamic'))
 
     def __init__(self, name):
     	self.name = name
@@ -22,7 +23,8 @@ class BucketListItemModel(db.Model):
     done = db.Column(db.Boolean(), default=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
-    bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'))
+    bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucket_list_model.id'))
+    bucketlist = db.relationship('BucketListModel', backref=db.backref('items', lazy='dynamic'))
 
     def __init__(self, task):
     	self.task = task
@@ -35,7 +37,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True)
     email = db.Column(db.String(200), unique=True)
-    bucketlists = db.relationship('BucketList', backref='user')
+    #bucketlists = db.relationship('bucketlistmodel', backref='user')
 
     def __init__(self, username, email):
         self.username = username
