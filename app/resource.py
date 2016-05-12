@@ -1,5 +1,6 @@
 from flask_restful import reqparse, abort, Resource
 from app.models import *
+from app.helper import *
 
 
 parser = reqparse.RequestParser()
@@ -21,7 +22,8 @@ class BucketList(Resource):
 
 class BucketLists(Resource):
     def get(self):
-        return []
+        bucketlists = BucketListModel.query.all()
+        return [bucketlist.get() for bucketlist in bucketlists]
 
     def post(self):
         #args = parser.parse_args()

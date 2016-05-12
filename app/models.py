@@ -6,28 +6,41 @@ class BucketListModel(db.Model):
     name = db.Column(db.String(255), unique=True)
     #items = db.relationship('BucketListItemModel', backref='bucketlist')
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     user = db.relationship('User', backref=db.backref('bucketlists', lazy='dynamic'))
 
-    def __init__(self, name):
+    def __init__(self, name, user):
     	self.name = name
+        self.user = user
+
+    def get(self):
+        return {
+            'id':self.id,
+            'name':self.name,
+            'created_by':self.user.username,
+            'date_created':str(self.date_created),
+            'date_modified':str(self.date_modified),
+        }
 
    	def __repr__():
    		return '<BucketListModel %r>' % self.name
+
+
 
 
 class BucketListItemModel(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     task = db.Column(db.String(255))
     done = db.Column(db.Boolean(), default=False)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucket_list_model.id'))
     bucketlist = db.relationship('BucketListModel', backref=db.backref('items', lazy='dynamic'))
 
-    def __init__(self, task):
+    def __init__(self, task, bucketlist):
     	self.task = task
+        self.bucketlist = bucketlist
 
    	def __repr__():
    		return '<BucketListItemModel %r>' % self.name
@@ -37,7 +50,8 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True)
     email = db.Column(db.String(200), unique=True)
-    #bucketlists = db.relationship('bucketlistmodel', backref='user')
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
     def __init__(self, username, email):
         self.username = username
