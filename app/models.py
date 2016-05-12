@@ -49,13 +49,24 @@ class BucketListItemModel(db.Model):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(20))
     email = db.Column(db.String(200), unique=True)
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
-    def __init__(self, username, email):
+    def __init__(self, username, email, password):
         self.username = username
         self.email = email
+        self.password = password
 
     def __repr__(self):
         return '<User %r>' % self.username
+
+    def get(self):
+        return {
+            'id':self.id,
+            'username':self.username,
+            'email':self.email,
+            'date_created':str(self.date_created),
+            'date_modified':str(self.date_modified),
+        }
