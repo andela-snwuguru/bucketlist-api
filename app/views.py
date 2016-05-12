@@ -17,7 +17,15 @@ def index():
 
 @app.route('/api/v1.0/auth/register', methods=['POST'])
 def register():
-    if not validate_registeration_data(request):
+	"""
+	This will register a new user and returns the user credentials
+	
+	Endpoint: /auth/register
+	Method: POST
+	Parameters: username, email, password
+	Response: JSON
+	"""
+    if not validate_data(request, ['username','email']):
         abort(400)
 
     user = User(request.json['username'], request.json['email'],md5(request.json.get('password', "")))
@@ -25,6 +33,25 @@ def register():
     	abort(401)
 
     return jsonify({'data': user.get()}), 201
+
+@app.route('/api/v1.0/auth/login', methods=['POST'])
+def login():
+	"""
+	This will authenticate user and provide token used to access other resources
+
+	Endpoint: /auth/login
+	Method: POST
+	Parameters: username, password
+	Response: JSON
+	"""
+    if not validate_data(request,['username','password']):
+        abort(400)
+
+    user = User.query.filter_by(username=request.json['username'],password=md5(request.json['password'])).first()
+    if not user:
+    	abort(403)
+
+    return jsonify({'token': user.generate_token(),'data': user.get()}), 200
 
 # handling errors 405
 @app.errorhandler(405)
@@ -35,6 +62,11 @@ def not_found(error):
 @app.errorhandler(404)
 def not_found(error):
 	return make_response(jsonify({'error': 'Resource not found ','code':404}), 404)
+
+# handling errors 403
+@app.errorhandler(403)
+def not_found(error):
+	return make_response(jsonify({'error': 'Unauthorized access','code':403}), 403)
 
 # handling errors 400
 @app.errorhandler(400)
