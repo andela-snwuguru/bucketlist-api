@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+from app.helper import encrypt, decrypt
 
 class BucketListModel(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
@@ -70,3 +71,7 @@ class User(db.Model):
             'date_created':str(self.date_created),
             'date_modified':str(self.date_modified),
         }
+
+    def generate_token(self):
+        string = str(self.password) + '|' + str(self.id)
+        return encrypt(string)
