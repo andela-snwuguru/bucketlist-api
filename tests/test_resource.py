@@ -1,14 +1,11 @@
 import unittest
 import json
-import os
 from os import sys, path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from app import app, db
 from app.models import *
 from app.helper import delete
 
-os.system('python ../script.py db migrate')
-os.system('python ../script.py db upgrade')
 
 class TestResources(unittest.TestCase):
 	"""Test cases for Resources"""
