@@ -1,5 +1,6 @@
-from itsdangerous import TimestampSigner
+from flask_restful import reqparse
 import hashlib
+from itsdangerous import TimestampSigner
 from app import db
 
 encrypt_key = 'bucketlists api'
@@ -43,6 +44,18 @@ def validate_required_fields(request, required=[]):
 		if not field in request.json:
 			return False
 	return True
+
+def validate_args(fields={}):
+	"""
+	This method helps to parse and validate provided parameters.
+	It will return parsed argument if the require fields are in request
+	"""
+	parser = reqparse.RequestParser()
+	for field in fields.keys():
+		help_message = field + ' can not be blank'
+		parser.add_argument(field, required=fields[field], help=help_message)
+	
+	return parser.parse_args()
 
 def md5(string):
 	"""

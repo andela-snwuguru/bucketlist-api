@@ -53,15 +53,13 @@ class BucketList(Resource):
 
     @auth.login_required
     def put(self, id):
-        if not validate_required_fields(request, ['name']):
-            abort(400, message="Missing required parameter")
-
+        args = validate_args({'name':True})
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
             abort(403, message="Unauthorized access")
 
-        bucketlist.name = request.json['name']
+        bucketlist.name = args['name']
 
         if not save(bucketlist):
             abort(409, message="Item already exists")
@@ -114,15 +112,13 @@ class BucketLists(Resource):
         Response: JSON
         """
 
-        if not validate_required_fields(request, ['name']):
-            abort(400, message="Missing required parameter")
-
+        args = validate_args({'name':True})
         user_id = get_user_id_from_token(token)
         user = User.query.filter_by(id=user_id).first()
         if not user:
             abort(403, message="Unauthorized access")
 
-        bucketlist = BucketListModel(request.json['name'], user)
+        bucketlist = BucketListModel(args['name'], user)
         if not save(bucketlist):
             abort(409, message="Item already exists")
 
@@ -164,11 +160,8 @@ class Login(Resource):
             password    (required)
         Response: JSON
         """
-
-        if not validate_required_fields(request,['username','password']):
-            abort(400)
-
-        user = User.query.filter_by(username=request.json['username'],password=md5(request.json['password'])).first()
+        args = validate_args({'username':True, 'password':True})
+        user = User.query.filter_by(username=args['username'],password=md5(args['password'])).first()
 
         if not user:
             abort(403)
@@ -191,12 +184,10 @@ class Register(Resource):
         Response: JSON
         """
 
-        if not validate_required_fields(request, ['username','email']):
-            abort(400)
-
-        user = User(request.json['username'], request.json['email'],md5(request.json.get('password', "")))
+        args = validate_args({'username':True, 'password':True, 'email':True})
+        user = User(args['username'], args['email'], md5(args['password']))
         if not save(user):
-            abort(401)
+            abort(401, message="User already exists")
 
         return {'data': user.get()}, 201
 
