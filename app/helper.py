@@ -12,8 +12,30 @@ def save(model):
 	except:
 		return False
 
+def delete(model):
+	try:
+		db.session.delete(model)
+		db.session.commit()
+		return True
+	except:
+		return False
 
-def validate_data(request, required=[]):
+
+def get_user_id_from_token(token):
+	"""
+	This method extracts the user id from provided access token
+	"""
+	data = token.split('|')
+	try:
+		return data[1]
+	except:
+		return 0
+
+def validate_required_fields(request, required=[]):
+	"""
+	This method helps to validate provided required fields.
+	It will return False if the require field is not in request
+	"""
 	if not request.json:
 		return False
 
@@ -23,13 +45,27 @@ def validate_data(request, required=[]):
 	return True
 
 def md5(string):
+	"""
+	This method will return md5 hash of a given string
+	"""
 	return hashlib.md5(string.encode("utf")).hexdigest()
 
 def encrypt(string):
-	signer = TimestampSigner(encrypt_key)
-	return signer.sign(string)
+	"""
+	This method will return encrypted version of a string.
+	It will return False if encryption fails
+	"""
+	try:
+		signer = TimestampSigner(encrypt_key)
+		return signer.sign(string)
+	except:
+		return False
 
-def decrypt(string, max_age=5):
+def decrypt(string, max_age=15000):
+	"""
+	This method will return decrypted version of an encrypted string.
+	If age of encryption is greater than max age it will return False
+	"""
 	try:
 		signer = TimestampSigner(encrypt_key)
 		return signer.unsign(string, max_age=max_age)

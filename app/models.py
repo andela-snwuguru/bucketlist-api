@@ -21,7 +21,7 @@ class BucketListModel(db.Model):
             'name':self.name,
             'created_by':self.user.username,
             'date_created':str(self.date_created),
-            'date_modified':str(self.date_modified),
+            'date_modified':str(self.date_modified)
         }
 
    	def __repr__():
@@ -73,5 +73,5 @@ class User(db.Model):
         }
 
     def generate_token(self):
-        string = str(self.password) + '|' + str(self.id)
+        string = str(self.password) + '|' + str(self.id) + '|'
         return encrypt(string)
