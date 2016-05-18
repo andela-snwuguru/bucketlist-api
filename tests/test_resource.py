@@ -11,6 +11,9 @@ class TestResources(unittest.TestCase):
 	"""Test cases for Resources"""
 
 	def register(self):
+		if self.uid:
+			return
+
 		user = {'username':'tuser', 'password':'test','email':'tuser@mail.com'}
 		response = self.app.post('/api/v1.0/auth/register',data=user)
 		self.assertEqual(response.status_code, 201)
@@ -50,10 +53,7 @@ class TestResources(unittest.TestCase):
 			delete(bucketlist)
         
         
-
-	def test_bucketlists_endpoint(self):
-		self.register()
-		
+	def new_bucketlist(self):
 		# posting to bucketlists endpoint
 		new_bucketlists = self.app.post('/api/v1.0/bucketlists', data={'name':'test item 1'}, 
 			headers={'AccessToken':self.token})
@@ -64,6 +64,22 @@ class TestResources(unittest.TestCase):
 		duplicate_bucketlists = self.app.post('/api/v1.0/bucketlists',data={'name':'test item 1'} , 
 			headers={'AccessToken':self.token})
 		self.assertEqual(duplicate_bucketlists.status_code, 409)
+       
+	def new_bucketlist_item(self):
+		# posting to bucketlists endpoint
+		new_bucketlist_item = self.app.post('/api/v1.0/bucketlists/' + str(self.bucketlist_id) + '/items', 
+			data={'task':'buy a private jet'}, 
+			headers={'AccessToken':self.token})
+
+		self.assertEqual(new_bucketlist_item.status_code, 201)
+		new_bucketlist_item_result = json.loads(new_bucketlist_item.data)
+		self.assertNotEqual(new_bucketlist_item_result.get('data'), None)
+
+
+	def test_bucketlists_endpoint(self):
+		self.register()
+		
+		self.new_bucketlist()
 
 		# Get bucketlists
 		get_bucketlists = self.app.get('/api/v1.0/bucketlists', headers={'AccessToken':self.token})
@@ -84,7 +100,6 @@ class TestResources(unittest.TestCase):
 		self.assertEqual(put_bucketlists.status_code, 201)
 		put_result = json.loads(put_bucketlists.data)
 		data = put_result.get('data')
-		print data['name']
 		self.assertEqual(str(data['name']), 'test item modified')
 
 		# delete bucketlists
@@ -92,7 +107,6 @@ class TestResources(unittest.TestCase):
 			headers={'AccessToken':self.token})
 		self.assertEqual(del_bucketlists.status_code, 204)
 
-		
 
 
 if __name__ == '__main__':
