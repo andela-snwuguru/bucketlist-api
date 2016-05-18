@@ -2,6 +2,7 @@ from app import db
 from datetime import datetime
 from app.helper import encrypt, decrypt
 
+
 class BucketListModel(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), unique=True)
@@ -45,6 +46,16 @@ class BucketListItemModel(db.Model):
 
    	def __repr__():
    		return '<BucketListItemModel %r>' % self.name
+
+    def get(self):
+        return {
+            'id':self.id,
+            'task':self.task,
+            'done':self.done,
+            'bucketlists':self.bucketlist.name,
+            'date_created':str(self.date_created),
+            'date_modified':str(self.date_modified)
+        }
 
 
 class User(db.Model):

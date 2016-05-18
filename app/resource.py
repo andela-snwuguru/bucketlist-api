@@ -5,15 +5,13 @@ from app.models import *
 from app.helper import *
 
 auth = HTTPBasicAuth()
-parser = reqparse.RequestParser()
-
-parser.add_argument('task')
 
 @auth.verify_password
 def verify_token(username, password):
     """
     This method will verify the token and allow access to any resource that requires authentication
     """
+
     global token
     token = request.headers.get('AccessToken','')
     if not token:
@@ -21,17 +19,26 @@ def verify_token(username, password):
 
     return decrypt(token)
 
-
 @auth.error_handler
 def unauthorized():
     """
     This will return a JSON error 403 response when token validation fails
     """
+
     return make_response(jsonify({'error': 'Unauthorized access','code':403}), 403)
 
 class BucketList(Resource):
     @auth.login_required
     def get(self, id):
+        """
+        This endpoint returns bucketlists details of a given bucketlist id.
+        Method: GET
+        Header:   
+            AccessToken  (required)
+
+        Response: JSON
+        """
+
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
@@ -41,6 +48,15 @@ class BucketList(Resource):
 
     @auth.login_required
     def delete(self, id):
+        """
+        This endpoint deletes a given bucketlist id from the database.
+        Method: DELETE
+        Header:   
+            AccessToken  (required)
+
+        Response: JSON
+        """
+
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
@@ -53,6 +69,17 @@ class BucketList(Resource):
 
     @auth.login_required
     def put(self, id):
+        """
+        This endpoint returns updated bucketlist details of a given bucketlist id.
+        Method: PUT
+        Parameters:
+            name (required) 
+        Header:   
+            AccessToken  (required)
+
+        Response: JSON
+        """
+
         args = validate_args({'name':True})
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
@@ -82,6 +109,7 @@ class BucketLists(Resource):
 
         Response: JSON
         """
+
         limit = int(request.args.get('limit',25))
         page = int(request.args.get('page',1))
         offset = (page * limit) - limit
@@ -126,26 +154,150 @@ class BucketLists(Resource):
 
 
 class BucketListItem(Resource):
+
+    @auth.login_required
     def get(self, id, item_id):
-        return {'bucketlist_id':id, 'item_id':item_id}
+        """
+        This endpoint returns bucketlists item details of a given bucketlist item id.
+        Method: GET
+        Header:   
+            AccessToken  (required)
 
+        Response: JSON
+        """
+
+        user_id = get_user_id_from_token(token)
+        bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
+        if not bucketlist:
+            abort(403, message="Unauthorized access")
+            
+        item = BucketListItemModel.query.filter_by(bucketlist_id=bucketlist.id, id=int(item_id)).first()
+        if not item:
+            abort(400, message="Item does not exist")
+
+        return {'data':item.get()}, 200
+
+    @auth.login_required
     def delete(self, id, item_id):
-        return '', 204
+        """
+        This endpoint deletes a given bucketlist item id from the database.
+        Method: DELETE
+        Header:   
+            AccessToken  (required)
 
+        Response: JSON
+        """
+
+        user_id = get_user_id_from_token(token)
+        bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
+        if not bucketlist:
+            abort(403, message="Unauthorized access")
+            
+        item = BucketListItemModel.query.filter_by(bucketlist_id=bucketlist.id, id=int(item_id)).first()
+        if not item:
+            abort(400, message="Item does not exist")
+
+        if not delete(item):
+            abort(401, message="Unable to delete record")
+
+        return {}, 204
+
+    @auth.login_required
     def put(self, id, item_id):
-        #args = parser.parse_args()
-        #task = {'task': args['task']}
-        return {}, 201
+        """
+        This endpoint returns updated bucketlist item details of a given bucketlist item id.
+        Method: PUT
+        Parameters:
+            task (optional) 
+            done (optional) 
+        Header:   
+            AccessToken  (required)
+
+        Response: JSON
+        """
+
+        args = validate_args({'task':False,'done':False})
+        user_id = get_user_id_from_token(token)
+        bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
+        if not bucketlist:
+            abort(403, message="Unauthorized access")
+            
+        item = BucketListItemModel.query.filter_by(bucketlist_id=bucketlist.id, id=int(item_id)).first()
+        if not item:
+            abort(400, message="Item does not exist")
+
+        item.task = args.get('task',item.task)
+        done = args.get('done',False)
+        item.done = True if done == 'True' else Fals
+
+        if not save(item):
+            abort(409, message="Unable to update record")
+
+        return {'data':item.get()}, 201
 
 
 class BucketListItems(Resource):
+    
+    @auth.login_required
     def get(self, id):
-        return []
+        """
+        This endpoint returns list of bucketlist items based on access token and bucketlist id.
+        Method: GET
+        Parameters:
+            limit (optional)    default=25
+            page  (optional)    default=1
+        Header:   
+            AccessToken  (required)
 
+        Response: JSON
+        """
+
+        user_id = get_user_id_from_token(token)
+        bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
+        if not bucketlist:
+            abort(403, message="Unauthorized access")
+
+        limit = int(request.args.get('limit',25))
+        page = int(request.args.get('page',1))
+        offset = (page * limit) - limit
+        user_id = get_user_id_from_token(token)
+        next_page = page + 1
+        prev_page = page - 1 if page > 1 else 1
+        all_items = BucketListItemModel.query.filter_by(bucketlist_id=bucketlist.id).all()
+        items = all_items[offset:(limit + offset)]
+        result = {'data':[item.get() for item in items],'page':{}}
+        if (limit + offset) < len(all_items):
+            result['page']['next'] = "/api/v1.0/bucketlists/" + str(id) + "?limit=" + str(limit) + "&page=" + str(next_page)
+        
+        if offset:
+            result['page']['prev'] = "/api/v1.0/bucketlists" + str(id) + "?limit=" + str(limit) + "&page=" + str(prev_page)
+
+        return result
+
+    @auth.login_required
     def post(self, id):
-        #args = parser.parse_args()
-        #todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
-        return {}, 201
+        """
+        This endpoint returns created bucketlist item details.
+        Method: POST
+        Parameters:
+            task (required) 
+        Header:   
+            AccessToken  (required)
+
+        Response: JSON
+        """
+
+        args = validate_args({'task':True})
+        user_id = get_user_id_from_token(token)
+        bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
+        if not bucketlist:
+            abort(403, message="Unauthorized access")
+        
+        item = BucketListItemModel(args['task'], bucketlist)    
+        if not save(item):
+            abort(409, message="Item already exists")
+
+        return {'data': item.get()}, 201
 
 
 
@@ -160,6 +312,7 @@ class Login(Resource):
             password    (required)
         Response: JSON
         """
+        
         args = validate_args({'username':True, 'password':True})
         user = User.query.filter_by(username=args['username'],password=md5(args['password'])).first()
 
