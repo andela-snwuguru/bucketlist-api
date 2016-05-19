@@ -1,6 +1,6 @@
 [report]
 omit =
     */python?.?/*
+    tests/*
     */site-packages/nose/*
     *__init__*
-    src/migration.py
