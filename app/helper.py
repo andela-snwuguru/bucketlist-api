@@ -6,6 +6,7 @@ from app import db
 encrypt_key = 'bucketlists api'
 
 def save(model):
+	""" Save a row in the database """
 	try:
 		db.session.add(model)
 		db.session.commit()
@@ -14,6 +15,7 @@ def save(model):
 		return False
 
 def delete(model):
+	""" Deletes a row from the database """
 	try:
 		db.session.delete(model)
 		db.session.commit()
@@ -31,19 +33,6 @@ def get_user_id_from_token(token):
 		return data[1]
 	except:
 		return 0
-
-def validate_required_fields(request, required=[]):
-	"""
-	This method helps to validate provided required fields.
-	It will return False if the require field is not in request
-	"""
-	if not request.json:
-		return False
-
-	for field in required:
-		if not field in request.json:
-			return False
-	return True
 
 def validate_args(fields={}):
 	"""
