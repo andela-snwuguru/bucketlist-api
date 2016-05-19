@@ -3,8 +3,17 @@ According to Merriam-Webster Dictionary, a Bucket List is a list of things that 
 This is a checkpoint 2 project used to evaluate Python beginner
 
 ## Features and Endpoints
-| Features | Endpoint
------------------------
-| Register | /auth/register
-
-| Authentication | /auth/login
+<table>
+<tr>
+<th> Features </th>
+<th> Endpoint</th>
+</tr>
+<tr>
+ <td>Register </td>
+ <td> /auth/register</td>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>/auth/login</td>
+</tr>
+</table>
