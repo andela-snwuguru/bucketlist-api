@@ -16,3 +16,8 @@ api.add_resource(BucketListItem, '/bucketlists/<id>/items/<item_id>')
 @app.route('/index')
 def index():
     return "Hello, BucketList!"
+
+
+@app.errorhandler(404)
+def not_found(error):
+	return make_response(jsonify({'error': 'Resource not found ','code':404}), 404)

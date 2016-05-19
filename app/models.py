@@ -6,7 +6,6 @@ from app.helper import encrypt, decrypt
 class BucketListModel(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), unique=True)
-    #items = db.relationship('BucketListItemModel', backref='bucketlist')
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())

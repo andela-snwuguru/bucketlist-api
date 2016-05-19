@@ -62,6 +62,9 @@ class BucketList(Resource):
         if not bucketlist:
             abort(403, message="Unauthorized access")
 
+        if len(bucketlist.items.all()):
+            abort(400, message="This Item is associated with bucketlist items")
+
         if not delete(bucketlist):
             abort(401, message="Unable to delete record")
 
@@ -112,11 +115,12 @@ class BucketLists(Resource):
 
         limit = int(request.args.get('limit',25))
         page = int(request.args.get('page',1))
+        q = request.args.get('q','')
         offset = (page * limit) - limit
         user_id = get_user_id_from_token(token)
         next_page = page + 1
         prev_page = page - 1 if page > 1 else 1
-        all_list = BucketListModel.query.filter_by(created_by=int(user_id)).all()
+        all_list = BucketListModel.query.filter(BucketListModel.name.like("%" + q + "%"), BucketListModel.created_by.is_(user_id)).all()
         bucketlists = all_list[offset:(limit + offset)]
         result = {'data':[bucketlist.get() for bucketlist in bucketlists],'page':{}}
         if (limit + offset) < len(all_list):
@@ -192,7 +196,7 @@ class BucketListItem(Resource):
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
             abort(403, message="Unauthorized access")
-            
+
         item = BucketListItemModel.query.filter_by(bucketlist_id=bucketlist.id, id=int(item_id)).first()
         if not item:
             abort(400, message="Item does not exist")
@@ -259,11 +263,15 @@ class BucketListItems(Resource):
 
         limit = int(request.args.get('limit',25))
         page = int(request.args.get('page',1))
+        q = request.args.get('q','')
         offset = (page * limit) - limit
         user_id = get_user_id_from_token(token)
         next_page = page + 1
         prev_page = page - 1 if page > 1 else 1
-        all_items = BucketListItemModel.query.filter_by(bucketlist_id=bucketlist.id).all()
+        all_items = BucketListItemModel.query.filter(
+            BucketListItemModel.task.like("%" + q + "%"), 
+            BucketListItemModel.bucketlist_id.is_(bucketlist.id)
+            ).all()
         items = all_items[offset:(limit + offset)]
         result = {'data':[item.get() for item in items],'page':{}}
         if (limit + offset) < len(all_items):
