@@ -1,4 +1,6 @@
 # bucketlist API
+[![Build Status](https://travis-ci.org/andela-snwuguru/bucketlist-api.svg?branch=ch-ci-integration)](https://travis-ci.org/andela-snwuguru/bucketlist-api) [![Coverage Status](https://coveralls.io/repos/github/andela-snwuguru/bucketlist-api/badge.svg?branch=ch-ci-integration)](https://coveralls.io/github/andela-snwuguru/bucketlist-api?branch=ch-ci-integration)
+
 According to Merriam-Webster Dictionary, a Bucket List is a list of things that one has not done before but wants to do before dying.
 This is a checkpoint 2 project used to evaluate Python beginner
 
