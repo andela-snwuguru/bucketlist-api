@@ -24,10 +24,8 @@ class BucketListModel(db.Model):
             'date_modified':str(self.date_modified)
         }
 
-   	def __repr__():
-   		return '<BucketListModel %r>' % self.name
-
-
+    def __repr__(self):
+        return '<BucketListModel %r>' % self.name
 
 
 class BucketListItemModel(db.Model):
@@ -43,9 +41,6 @@ class BucketListItemModel(db.Model):
     	self.task = task
         self.bucketlist = bucketlist
 
-   	def __repr__():
-   		return '<BucketListItemModel %r>' % self.name
-
     def get(self):
         return {
             'id':self.id,
@@ -55,6 +50,9 @@ class BucketListItemModel(db.Model):
             'date_created':str(self.date_created),
             'date_modified':str(self.date_modified)
         }
+
+    def __repr__(self):
+        return '<BucketListItemModel %r>' % self.task
 
 
 class User(db.Model):

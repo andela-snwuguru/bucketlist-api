@@ -7,7 +7,7 @@ from app.models import *
 from app.helper import delete
 
 
-class TestResources(unittest.TestCase):
+class TestBucketlistResources(unittest.TestCase):
 	"""Test cases for Resources"""
 
 	def register(self):
@@ -94,6 +94,10 @@ class TestResources(unittest.TestCase):
 	def get_single_bucketlist(self):
 		""" Get bucketlists single item """
 
+		get_bucketlists = self.app.get('/api/v1.0/bucketlists/0', 
+			headers={'AccessToken':self.token})
+		self.assertEqual(get_bucketlists.status_code, 403)
+
 		get_bucketlists = self.app.get('/api/v1.0/bucketlists/'+ str(self.bucketlist_id), 
 			headers={'AccessToken':self.token})
 		self.assertEqual(get_bucketlists.status_code, 200)
@@ -102,6 +106,10 @@ class TestResources(unittest.TestCase):
 
 	def update_bucketist(self):
 		""" Update bucketlists """
+
+		put_bucketlists = self.app.put('/api/v1.0/bucketlists/0', 
+			data={'name':'test item modified'}, headers={'AccessToken':self.token})
+		self.assertEqual(put_bucketlists.status_code, 403)
 
 		put_bucketlists = self.app.put('/api/v1.0/bucketlists/'+ str(self.bucketlist_id), 
 			data={'name':'test item modified'}, headers={'AccessToken':self.token})
