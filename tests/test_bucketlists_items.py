@@ -7,7 +7,7 @@ from app.models import *
 from app.helper import delete
 
 
-class TestResources(unittest.TestCase):
+class TestBucketlistItemResources(unittest.TestCase):
 	"""Test cases for Bucketlist Items"""
 
 	def register(self):
@@ -18,6 +18,10 @@ class TestResources(unittest.TestCase):
 		user = {'username':'tuser', 'password':'test','email':'tuser@mail.com'}
 		response = self.app.post('/api/v1.0/auth/register',data=user)
 		self.assertEqual(response.status_code, 201)
+
+		duplicate_response = self.app.post('/api/v1.0/auth/register',data=user)
+		self.assertEqual(duplicate_response.status_code, 401)
+
 		result = json.loads(response.data)
 		if not result.get('message'):
 			self.uid = result['data']['id']
@@ -33,6 +37,10 @@ class TestResources(unittest.TestCase):
 
 	def get_token(self):
 		""" Login to retrieve access token """
+
+		user = {'username':'tuserfake', 'password':'test'}
+		response = self.app.post('/api/v1.0/auth/login',data=user)
+		self.assertEqual(response.status_code, 403)
 
 		user = {'username':'tuser', 'password':'test'}
 		response = self.app.post('/api/v1.0/auth/login',data=user)
@@ -84,11 +92,16 @@ class TestResources(unittest.TestCase):
 	def new_bucketlist_item(self):
 		""" Posting to bucketlists endpoint """
 
+		new_bucketlist_item = self.app.post('/api/v1.0/bucketlists/0' + '/items', 
+			data={'task':'buy a private jet'}, 
+			headers={'AccessToken':self.token})
+		self.assertEqual(new_bucketlist_item.status_code, 403)
+		
 		new_bucketlist_item = self.app.post('/api/v1.0/bucketlists/' + str(self.bucketlist_id) + '/items', 
 			data={'task':'buy a private jet'}, 
 			headers={'AccessToken':self.token})
-
 		self.assertEqual(new_bucketlist_item.status_code, 201)
+
 		new_bucketlist_item_result = json.loads(new_bucketlist_item.data)
 		self.assertNotEqual(new_bucketlist_item_result.get('data'), None)
 		if new_bucketlist_item_result:
@@ -115,6 +128,10 @@ class TestResources(unittest.TestCase):
 	def update_item(self):
 		""" Update bucketlist item """
 
+		put_item = self.app.put('/api/v1.0/bucketlists/0' + '/items/' + str(self.bucketlist_item_id), 
+			data={'done':True}, headers={'AccessToken':self.token})
+		self.assertEqual(put_item.status_code, 403)
+
 		put_item = self.app.put('/api/v1.0/bucketlists/'  + str(self.bucketlist_id) + '/items/' + str(self.bucketlist_item_id), 
 			data={'done':True}, headers={'AccessToken':self.token})
 		self.assertEqual(put_item.status_code, 201)
@@ -122,8 +139,25 @@ class TestResources(unittest.TestCase):
 		data = put_result.get('data')
 		self.assertEqual(data['done'], True)
 
+
+	def delete_bucketlist(self):
+		""" Delete bucketlists """
+
+		del_bucketlists = self.app.delete('/api/v1.0/bucketlists/'+ str(self.bucketlist_id), 
+			headers={'AccessToken':self.token})
+		self.assertEqual(del_bucketlists.status_code, 400)
+
+		del_bucketlists = self.app.delete('/api/v1.0/bucketlists/0', 
+			headers={'AccessToken':self.token})
+		self.assertEqual(del_bucketlists.status_code, 403)
+
 	def delete_item(self):
 		""" Delete bucketlist item """
+
+		del_item = self.app.delete('/api/v1.0/bucketlists/0'+ '/items/' + str(self.bucketlist_item_id), 
+			headers={'AccessToken':self.token})
+		self.assertEqual(del_item.status_code, 403)
+
 		del_item = self.app.delete('/api/v1.0/bucketlists/'+ str(self.bucketlist_id) + '/items/' + str(self.bucketlist_item_id), 
 			headers={'AccessToken':self.token})
 		self.assertEqual(del_item.status_code, 204)
@@ -136,6 +170,8 @@ class TestResources(unittest.TestCase):
 		self.new_bucketlist_item()
 		self.get_items()
 		self.update_item()
+		self.get_single_item()
+		self.delete_bucketlist()
 		self.delete_item()
 
 

@@ -325,7 +325,7 @@ class Login(Resource):
         user = User.query.filter_by(username=args['username'],password=md5(args['password'])).first()
 
         if not user:
-            abort(403)
+            abort(403, message='Invalid user credentials')
 
         return {'token': user.generate_token(),'data': user.get()}, 200
 
