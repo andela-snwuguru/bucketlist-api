@@ -232,7 +232,7 @@ class BucketListItem(Resource):
 
         item.task = args.get('task',item.task)
         done = args.get('done',False)
-        item.done = True if done == 'True' else Fals
+        item.done = True if done == 'True' else False
 
         if not save(item):
             abort(409, message="Unable to update record")
