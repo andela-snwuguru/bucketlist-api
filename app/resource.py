@@ -231,8 +231,8 @@ class BucketListItem(Resource):
             abort(400, message="Item does not exist")
 
         item.task = args.get('task',item.task)
-        done = args.get('done',False)
-        item.done = True if done == 'True' else False
+        done = args.get('done','false')
+        item.done = True if done.lower() == 'true' else False
 
         if not save(item):
             abort(409, message="Unable to update record")
