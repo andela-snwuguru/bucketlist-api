@@ -113,7 +113,10 @@ class BucketLists(Resource):
         Response: JSON
         """
 
-        limit = int(request.args.get('limit',25))
+        limit = int(request.args.get('limit',20))
+        if limit > 100:
+            limit = 100
+
         page = int(request.args.get('page',1))
         q = request.args.get('q','')
         offset = (page * limit) - limit
@@ -238,7 +241,10 @@ class BucketListItems(Resource):
         if not bucketlist:
             abort(403, message="Unauthorized access")
 
-        limit = int(request.args.get('limit',25))
+        limit = int(request.args.get('limit',20))
+        if limit > 100:
+            limit = 100
+            
         page = int(request.args.get('page',1))
         q = request.args.get('q','')
         offset = (page * limit) - limit
