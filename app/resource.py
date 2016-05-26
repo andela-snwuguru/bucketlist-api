@@ -299,10 +299,12 @@ class Login(Resource):
         """
         
         args = validate_args({'username':True, 'password':True})
-        user = User.query.filter_by(username=args['username'],password=md5(args['password'])).first()
-
+        user = User.query.filter_by(username=args['username']).first()
         if not user:
-            abort(403, message='Invalid user credentials')
+            abort(403, message='Invalid username')
+
+        if user.password != md5(args['password']):
+            abort(403, message="Incorrect password")
 
         return {'token': user.generate_token()}, 200
 
