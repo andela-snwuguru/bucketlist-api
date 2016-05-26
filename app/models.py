@@ -21,8 +21,17 @@ class BucketListModel(db.Model):
             'name':self.name,
             'created_by':self.user.username,
             'date_created':str(self.date_created),
-            'date_modified':str(self.date_modified)
+            'date_modified':str(self.date_modified),
+            'items':self.get_items()
         }
+
+    def get_items(self):
+        items = self.items.all()
+        data = []
+        for item in items:
+            data.append(item.get())
+        return data
+
 
     def __repr__(self):
         return '<BucketListModel %r>' % self.name
