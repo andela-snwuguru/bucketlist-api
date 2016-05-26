@@ -62,8 +62,10 @@ class BucketList(Resource):
         if not bucketlist:
             abort(404, message="Bucketlist not found")
 
-        if len(bucketlist.items.all()):
-            abort(400, message="This Item is associated with bucketlist items")
+        items = bucketlist.items.all()
+        if len(items):
+            for item in items:
+                delete(delete(item))
 
         if not delete(bucketlist):
             abort(401, message="Unable to delete record")
@@ -239,7 +241,7 @@ class BucketListItems(Resource):
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
-            abort(403, message="Unauthorized access")
+            abort(404, message="Bucketlist not found")
 
         limit = int(request.args.get('limit',20))
         if limit > 100:
