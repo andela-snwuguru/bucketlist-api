@@ -44,7 +44,7 @@ class BucketList(Resource):
         if not bucketlist:
             abort(403, message="Unauthorized access")
 
-        return {'data':bucketlist.get()}
+        return bucketlist.get()
 
     @auth.login_required
     def delete(self, id):
@@ -94,7 +94,7 @@ class BucketList(Resource):
         if not save(bucketlist):
             abort(409, message="Item already exists")
 
-        return {'data':bucketlist.get()}, 201
+        return bucketlist.get(), 201
 
 
 class BucketLists(Resource):
@@ -154,7 +154,7 @@ class BucketLists(Resource):
         if not save(bucketlist):
             abort(409, message="Item already exists")
 
-        return {'data': bucketlist.get()}, 201
+        return bucketlist.get(), 201
 
 
 class BucketListItem(Resource):
@@ -179,32 +179,7 @@ class BucketListItem(Resource):
         if not item:
             abort(400, message="Item does not exist")
 
-        return {'data':item.get()}, 200
-
-    @auth.login_required
-    def delete(self, id, item_id):
-        """
-        This endpoint deletes a given bucketlist item id from the database.
-        Method: DELETE
-        Header:   
-            AccessToken  (required)
-
-        Response: JSON
-        """
-
-        user_id = get_user_id_from_token(token)
-        bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
-        if not bucketlist:
-            abort(403, message="Unauthorized access")
-
-        item = BucketListItemModel.query.filter_by(bucketlist_id=bucketlist.id, id=int(item_id)).first()
-        if not item:
-            abort(400, message="Item does not exist")
-
-        if not delete(item):
-            abort(401, message="Unable to delete record")
-
-        return {}, 204
+        return item.get(), 200
 
     @auth.login_required
     def put(self, id, item_id):
@@ -230,14 +205,16 @@ class BucketListItem(Resource):
         if not item:
             abort(400, message="Item does not exist")
 
-        item.task = args.get('task',item.task)
+        if args.get('task'):
+            item.task = args.get('task')
+            
         done = args.get('done','false')
         item.done = True if done.lower() == 'true' else False
 
         if not save(item):
             abort(409, message="Unable to update record")
 
-        return {'data':item.get()}, 201
+        return item.get(), 201
 
 
 class BucketListItems(Resource):
@@ -305,7 +282,7 @@ class BucketListItems(Resource):
         if not save(item):
             abort(409, message="Item already exists")
 
-        return {'data': item.get()}, 201
+        return item.get(), 201
 
 
 
@@ -327,7 +304,7 @@ class Login(Resource):
         if not user:
             abort(403, message='Invalid user credentials')
 
-        return {'token': user.generate_token(),'data': user.get()}, 200
+        return {'token': user.generate_token()}, 200
 
 
 class Register(Resource):
@@ -350,7 +327,7 @@ class Register(Resource):
         if not save(user):
             abort(401, message="User already exists")
 
-        return {'data': user.get()}, 201
+        return user.get(), 201
 
 
 
