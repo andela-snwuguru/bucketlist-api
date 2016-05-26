@@ -24,7 +24,7 @@ class TestBucketlistItemResources(unittest.TestCase):
 
 		result = json.loads(response.data)
 		if not result.get('message'):
-			self.uid = result['data']['id']
+			self.uid = result['id']
         	self.token = self.get_token()
    
 
@@ -85,8 +85,9 @@ class TestBucketlistItemResources(unittest.TestCase):
 			headers={'AccessToken':self.token})
 		self.assertEqual(new_bucketlists.status_code, 201)
 		new_bucketlists_result = json.loads(new_bucketlists.data)
-		if new_bucketlists_result.get('data'):
-			self.bucketlist_id = new_bucketlists_result['data']['id']
+
+		if new_bucketlists_result.get('id'):
+			self.bucketlist_id = new_bucketlists_result['id']
 		
        
 	def new_bucketlist_item(self):
@@ -95,7 +96,7 @@ class TestBucketlistItemResources(unittest.TestCase):
 		new_bucketlist_item = self.app.post('/api/v1.0/bucketlists/0' + '/items', 
 			data={'task':'buy a private jet'}, 
 			headers={'AccessToken':self.token})
-		self.assertEqual(new_bucketlist_item.status_code, 403)
+		self.assertEqual(new_bucketlist_item.status_code, 404)
 		
 		new_bucketlist_item = self.app.post('/api/v1.0/bucketlists/' + str(self.bucketlist_id) + '/items', 
 			data={'task':'buy a private jet'}, 
@@ -103,9 +104,9 @@ class TestBucketlistItemResources(unittest.TestCase):
 		self.assertEqual(new_bucketlist_item.status_code, 201)
 
 		new_bucketlist_item_result = json.loads(new_bucketlist_item.data)
-		self.assertNotEqual(new_bucketlist_item_result.get('data'), None)
+		self.assertNotEqual(new_bucketlist_item_result.get('id'), None)
 		if new_bucketlist_item_result:
-			self.bucketlist_item_id = new_bucketlist_item_result['data']['id']
+			self.bucketlist_item_id = new_bucketlist_item_result['id']
 
 	def get_items(self):
 		""" Get bucketlist Items """
@@ -123,44 +124,33 @@ class TestBucketlistItemResources(unittest.TestCase):
 			headers={'AccessToken':self.token})
 		self.assertEqual(get_item.status_code, 200)
 		get_result = json.loads(get_item.data)
-		self.assertNotEqual(get_result.get('data'), None)
+		self.assertNotEqual(get_result.get('id'), None)
 
 	def update_item(self):
 		""" Update bucketlist item """
 
 		put_item = self.app.put('/api/v1.0/bucketlists/0' + '/items/' + str(self.bucketlist_item_id), 
 			data={'done':True}, headers={'AccessToken':self.token})
-		self.assertEqual(put_item.status_code, 403)
+		self.assertEqual(put_item.status_code, 404)
 
 		put_item = self.app.put('/api/v1.0/bucketlists/'  + str(self.bucketlist_id) + '/items/' + str(self.bucketlist_item_id), 
-			data={'done':True}, headers={'AccessToken':self.token})
+			data={'done':'true'}, headers={'AccessToken':self.token})
 		self.assertEqual(put_item.status_code, 201)
 		put_result = json.loads(put_item.data)
-		data = put_result.get('data')
-		self.assertEqual(data['done'], True)
+		
+		self.assertEqual(put_result['done'], True)
 
 
 	def delete_bucketlist(self):
 		""" Delete bucketlists """
 
-		del_bucketlists = self.app.delete('/api/v1.0/bucketlists/'+ str(self.bucketlist_id), 
-			headers={'AccessToken':self.token})
-		self.assertEqual(del_bucketlists.status_code, 400)
-
 		del_bucketlists = self.app.delete('/api/v1.0/bucketlists/0', 
 			headers={'AccessToken':self.token})
-		self.assertEqual(del_bucketlists.status_code, 403)
+		self.assertEqual(del_bucketlists.status_code, 404)
 
-	def delete_item(self):
-		""" Delete bucketlist item """
-
-		del_item = self.app.delete('/api/v1.0/bucketlists/0'+ '/items/' + str(self.bucketlist_item_id), 
+		del_bucketlists = self.app.delete('/api/v1.0/bucketlists/'+ str(self.bucketlist_id), 
 			headers={'AccessToken':self.token})
-		self.assertEqual(del_item.status_code, 403)
-
-		del_item = self.app.delete('/api/v1.0/bucketlists/'+ str(self.bucketlist_id) + '/items/' + str(self.bucketlist_item_id), 
-			headers={'AccessToken':self.token})
-		self.assertEqual(del_item.status_code, 204)
+		self.assertEqual(del_bucketlists.status_code, 204)
 
 	def test_bucketlists_endpoint(self):
 		""" Test all endpoint of bucketlist items """
@@ -172,7 +162,6 @@ class TestBucketlistItemResources(unittest.TestCase):
 		self.update_item()
 		self.get_single_item()
 		self.delete_bucketlist()
-		self.delete_item()
 
 
 

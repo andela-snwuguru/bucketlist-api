@@ -19,7 +19,7 @@ class TestBucketlistResources(unittest.TestCase):
 		self.assertEqual(response.status_code, 201)
 		result = json.loads(response.data)
 		if not result.get('message'):
-			self.uid = result['data']['id']
+			self.uid = result['id']
         	self.token = self.get_token()
    
 
@@ -67,22 +67,12 @@ class TestBucketlistResources(unittest.TestCase):
 			headers={'AccessToken':self.token})
 		self.assertEqual(new_bucketlists.status_code, 201)
 		new_bucketlists_result = json.loads(new_bucketlists.data)
-		if new_bucketlists_result.get('data'):
-			self.bucketlist_id = new_bucketlists_result['data']['id']
+		if new_bucketlists_result.get('id'):
+			self.bucketlist_id = new_bucketlists_result['id']
 		duplicate_bucketlists = self.app.post('/api/v1.0/bucketlists',data={'name':'test item 1'} , 
 			headers={'AccessToken':self.token})
 		self.assertEqual(duplicate_bucketlists.status_code, 409)
        
-	def new_bucketlist_item(self):
-		# posting to bucketlists endpoint
-		new_bucketlist_item = self.app.post('/api/v1.0/bucketlists/' + str(self.bucketlist_id) + '/items', 
-			data={'task':'buy a private jet'}, 
-			headers={'AccessToken':self.token})
-
-		self.assertEqual(new_bucketlist_item.status_code, 201)
-		new_bucketlist_item_result = json.loads(new_bucketlist_item.data)
-		self.assertNotEqual(new_bucketlist_item_result.get('data'), None)
-
 	def get_bucketlists(self):
 		""" Get bucketlists """
 
@@ -96,27 +86,26 @@ class TestBucketlistResources(unittest.TestCase):
 
 		get_bucketlists = self.app.get('/api/v1.0/bucketlists/0', 
 			headers={'AccessToken':self.token})
-		self.assertEqual(get_bucketlists.status_code, 403)
+		self.assertEqual(get_bucketlists.status_code, 404)
 
 		get_bucketlists = self.app.get('/api/v1.0/bucketlists/'+ str(self.bucketlist_id), 
 			headers={'AccessToken':self.token})
 		self.assertEqual(get_bucketlists.status_code, 200)
 		get_result = json.loads(get_bucketlists.data)
-		self.assertNotEqual(get_result.get('data'), None)
+		self.assertNotEqual(get_result.get('id'), None)
 
 	def update_bucketist(self):
 		""" Update bucketlists """
 
 		put_bucketlists = self.app.put('/api/v1.0/bucketlists/0', 
 			data={'name':'test item modified'}, headers={'AccessToken':self.token})
-		self.assertEqual(put_bucketlists.status_code, 403)
+		self.assertEqual(put_bucketlists.status_code, 404)
 
 		put_bucketlists = self.app.put('/api/v1.0/bucketlists/'+ str(self.bucketlist_id), 
 			data={'name':'test item modified'}, headers={'AccessToken':self.token})
 		self.assertEqual(put_bucketlists.status_code, 201)
 		put_result = json.loads(put_bucketlists.data)
-		data = put_result.get('data')
-		self.assertEqual(str(data['name']), 'test item modified')
+		self.assertEqual(str(put_result['name']), 'test item modified')
 
 	def delete_bucketlist(self):
 		""" Delete bucketlists """
