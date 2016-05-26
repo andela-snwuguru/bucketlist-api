@@ -42,7 +42,7 @@ class BucketList(Resource):
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
-            abort(403, message="Unauthorized access")
+            abort(404, message="Bucketlist not found")
 
         return bucketlist.get()
 
@@ -60,7 +60,7 @@ class BucketList(Resource):
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
-            abort(403, message="Unauthorized access")
+            abort(404, message="Bucketlist not found")
 
         if len(bucketlist.items.all()):
             abort(400, message="This Item is associated with bucketlist items")
@@ -87,7 +87,7 @@ class BucketList(Resource):
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
-            abort(403, message="Unauthorized access")
+            abort(404, message="Bucketlist not found")
 
         bucketlist.name = args['name']
 
@@ -151,7 +151,7 @@ class BucketLists(Resource):
         user_id = get_user_id_from_token(token)
         user = User.query.filter_by(id=user_id).first()
         if not user:
-            abort(403, message="Unauthorized access")
+            abort(404, message="User not found")
 
         bucketlist = BucketListModel(args['name'], user)
         if not save(bucketlist):
@@ -176,11 +176,11 @@ class BucketListItem(Resource):
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
-            abort(403, message="Unauthorized access")
+            abort(404, message="Bucketlist not found")
             
         item = BucketListItemModel.query.filter_by(bucketlist_id=bucketlist.id, id=int(item_id)).first()
         if not item:
-            abort(400, message="Item does not exist")
+            abort(400, message="Bucketlist Item does not exist")
 
         return item.get(), 200
 
@@ -202,18 +202,18 @@ class BucketListItem(Resource):
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
-            abort(403, message="Unauthorized access")
+            abort(404, message="Bucketlist not found")
             
         item = BucketListItemModel.query.filter_by(bucketlist_id=bucketlist.id, id=int(item_id)).first()
         if not item:
-            abort(400, message="Item does not exist")
+            abort(400, message="Bucketlist Item does not exist")
 
         if args.get('task'):
             item.task = args.get('task')
+         
+        if args.get('done'):
+            item.done = True if args.get('done') == 'true' else False
             
-        done = args.get('done','false')
-        item.done = True if done.lower() == 'true' else False
-
         if not save(item):
             abort(409, message="Unable to update record")
 
@@ -282,7 +282,7 @@ class BucketListItems(Resource):
         user_id = get_user_id_from_token(token)
         bucketlist = BucketListModel.query.filter_by(id=id, created_by=int(user_id)).first()
         if not bucketlist:
-            abort(403, message="Unauthorized access")
+            abort(404, message="Bucketlist not found")
         
         item = BucketListItemModel(args['task'], bucketlist)    
         if not save(item):
