@@ -1,6 +1,6 @@
+from flask import jsonify, abort, make_response, request, url_for
+from flask_restful import Api
 from app import app
-from flask import  jsonify, abort, make_response, request, url_for
-from flask_restful import  Api
 from app.resource import *
 
 api = Api(app, prefix='/api/v1.0')
@@ -12,6 +12,7 @@ api.add_resource(BucketList, '/bucketlists/<id>')
 api.add_resource(BucketListItems, '/bucketlists/<id>/items')
 api.add_resource(BucketListItem, '/bucketlists/<id>/items/<item_id>')
 
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -20,4 +21,4 @@ def index():
 
 @app.errorhandler(404)
 def not_found(error):
-	return make_response(jsonify({'error': 'Resource not found ','code':404}), 404)
+    return make_response(jsonify({'error': 'Resource not found ', 'code': 404}), 404)
